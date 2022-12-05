@@ -13,57 +13,51 @@ private val test = """
     move 1 from 1 to 2
 """.trimIndent()
 
-private fun parse(startingStacks: String): MutableMap<Int, Stack<Char>> {
-    val cols = Regex("""\d""").findAll(startingStacks.split("\n").last()).map { it.range.first }.toList()
+typealias Stacks = Map<Int, Stack<Char>>
+typealias InstructionCallback = (stacks: Stacks, num: Int, from: Int, to: Int) -> Unit
+val instructionPattern = Regex("""move (\d+) from (\d+) to (\d+)""")
 
-    val stacks = mutableMapOf<Int, Stack<Char>>()
-    for (i in cols.indices) {
-        stacks[i + 1] = Stack()
-    }
+private fun parse(startingStacks: String): Stacks {
+    val colNumToIndex = Regex("""\d""").findAll(startingStacks.split("\n").last())
+        .mapIndexed { i, match -> i + 1 to match.range.first }.toMap()
+    val stacks = colNumToIndex.keys.associateWith { Stack<Char>() }
 
-    for (row in startingStacks.split("\n").dropLast(1).reversed()) {
-        for ((i, col) in cols.withIndex()) {
+    startingStacks.split("\n").dropLast(1).reversed().forEach { row ->
+        colNumToIndex.forEach { (i, col) ->
             val crate = row[col]
-            if (crate == ' ') {
-                continue
+            if (crate.isLetter()) {
+                stacks[i]?.add(crate)
             }
-            stacks[i+1]!!.add(crate)
         }
     }
 
     return stacks
 }
 
-private fun partOne(inp: String): String {
+private fun compute(inp: String, callback: InstructionCallback): String {
     val (startingStacks, rearrangement) = inp.split("\n\n")
     val stacks = parse(startingStacks)
 
-    val instructionPattern = Regex("""move (\d+) from (\d+) to (\d+)""")
     instructionPattern.findAll(rearrangement).forEach { instruction ->
         val (num, from, to) = instruction.groupValues.drop(1).map { it.toInt() }
-        for (i in 0 until num) {
-            stacks[to]!!.add(stacks[from]!!.pop())
-        }
+        callback(stacks, num, from, to)
     }
 
     return stacks.values.map { it.last() }.joinToString("")
 }
 
-private fun partTwo(inp: String): String {
-    val (startingStacks, rearrangement) = inp.split("\n\n")
-    val stacks = parse(startingStacks)
-
-    val instructionPattern = Regex("""move (\d+) from (\d+) to (\d+)""")
-    instructionPattern.findAll(rearrangement).forEach { instruction ->
-        val (num, from, to) = instruction.groupValues.drop(1).map { it.toInt() }
-        val toMove = mutableListOf<Char>()
-        for (i in 0 until num) {
-            toMove.add(stacks[from]!!.pop())
-        }
-        stacks[to]!!.addAll(toMove.reversed())
+private fun partOne(inp: String): String {
+    return compute(inp) { stacks, num, from, to ->
+        repeat(num) { stacks[to]?.add(stacks[from]?.pop()) }
     }
+}
 
-    return stacks.values.map { it.last() }.joinToString("")
+private fun partTwo(inp: String): String {
+    return compute(inp) { stacks, num, from, to ->
+        val toMove = mutableListOf<Char>()
+        repeat(num) { toMove.add(stacks[from]!!.pop()) }
+        stacks[to]?.addAll(toMove.reversed())
+    }
 }
 
 fun main() {
