@@ -40,13 +40,11 @@ def compare(left: int|list, right: int|list, *, depth: int) -> int:
             for l, r in zip(left, right, strict=True):
                 if both_type(l, r, int):
                     comparison = compare_int(l, r)
-                    if comparison == 0:
-                        continue
-                    return comparison
                 else:
                     comparison = compare(l, r, depth=depth+1)
-                    if comparison != 0:
-                        return comparison
+
+                if comparison != 0:
+                    return comparison
 
         except ValueError:
             return -1 if len(left) < len(right) else 1
