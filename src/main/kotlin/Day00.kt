@@ -14,6 +14,6 @@ private fun partTwo(inp: String): Int {
 
 fun main() {
     val inp = File("src/main/resources/day00.txt").readText().trim()
-    println(partOne(inp))
-    println(partTwo(inp))
+    println(partOne(test))
+    println(partTwo(test))
 }
