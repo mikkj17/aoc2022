@@ -1,6 +1,8 @@
+package aoc2022
+
+import com.microsoft.z3.*
 import java.io.File
 import kotlin.math.abs
-import kotlin.math.max
 
 private val test = """
     Sensor at x=2, y=18: closest beacon is at x=-2, y=15
@@ -65,14 +67,47 @@ private fun partOne(inp: String, targetRow: Int): Int {
     return impossibles
 }
 
-private fun partTwo(inp: String, maxCoord: Int): Int {
-    val (beacons, sensors) = parse(inp)
+private fun z3Abs(ctx: Context, expr: ArithExpr<IntSort>): Expr<IntSort> {
+    val zero = ctx.mkInt(0)
+    return ctx.mkITE(ctx.mkGe(expr, zero), expr, ctx.mkSub(zero, expr))
+}
 
-    return 0
+private fun partTwo(inp: String, maxCoord: Int): Long {
+    val (_, sensors) = parse(inp)
+
+    val ctx = Context()
+    val solver = ctx.mkSolver()
+    val x = ctx.mkIntConst("x")
+    val y = ctx.mkIntConst("y")
+
+    solver.add(
+        ctx.mkGe(x, ctx.mkInt(0)),
+        ctx.mkGe(y, ctx.mkInt(0)),
+        ctx.mkLe(x, ctx.mkInt(maxCoord)),
+        ctx.mkLe(y, ctx.mkInt(maxCoord)),
+    )
+
+    sensors.forEach { sensor ->
+        val distToBeacon = ctx.mkInt(sensor.distanceToBeacon())
+        val dist = ctx.mkAdd(
+            z3Abs(ctx, ctx.mkSub(x, ctx.mkInt(sensor.x))),
+            z3Abs(ctx, ctx.mkSub(y, ctx.mkInt(sensor.y))),
+        )
+        solver.add(
+            ctx.mkGt(dist, distToBeacon),
+        )
+    }
+
+    solver.check()
+    val model = solver.model
+    val xSolution = model.getConstInterp(x).toString().toLong()
+    val ySolution = model.getConstInterp(y).toString().toLong()
+
+    return xSolution * 4000000 + ySolution
 }
 
 fun main() {
-    val inp = File("src/main/resources/day15.txt").readText().trim()
+    val inp = File("app/src/main/resources/day15.txt").readText().trim()
     println(partOne(inp, targetRow = 2000000))
     println(partTwo(inp, maxCoord = 4000000))
 }

@@ -1,3 +1,5 @@
+package aoc2022
+
 import java.io.File
 import java.util.Stack
 
@@ -61,7 +63,7 @@ private fun partTwo(inp: String): String {
 }
 
 fun main() {
-    val inp = File("src/main/resources/day05.txt").readText()
+    val inp = File("app/src/main/resources/day05.txt").readText()
     println(partOne(inp))
     println(partTwo(inp))
 }

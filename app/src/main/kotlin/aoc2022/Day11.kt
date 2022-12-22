@@ -1,3 +1,5 @@
+package aoc2022
+
 import java.io.File
 
 private val test = """
@@ -103,7 +105,7 @@ private fun partTwo(inp: String): Long {
 }
 
 fun main() {
-    val inp = File("src/main/resources/day11.txt").readText().trim()
+    val inp = File("app/src/main/resources/day11.txt").readText().trim()
     println(partOne(inp))
     println(partTwo(inp))
 }

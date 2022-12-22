@@ -1,3 +1,5 @@
+package aoc2022
+
 import java.io.File
 import kotlin.math.abs
 
@@ -102,7 +104,7 @@ private fun partTwo(inp: String): Int {
 }
 
 fun main() {
-    val inp = File("src/main/resources/day09.txt").readText().trim()
+    val inp = File("app/src/main/resources/day09.txt").readText().trim()
     println(partOne(inp))
     println(partTwo(inp))
 }
