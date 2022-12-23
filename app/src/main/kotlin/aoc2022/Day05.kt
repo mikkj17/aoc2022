@@ -17,7 +17,6 @@ private val test = """
 
 typealias Stacks = Map<Int, Stack<Char>>
 typealias InstructionCallback = (stacks: Stacks, num: Int, from: Int, to: Int) -> Unit
-val instructionPattern = Regex("""move (\d+) from (\d+) to (\d+)""")
 
 private fun parse(startingStacks: String): Stacks {
     val colNumToIndex = Regex("""\d""").findAll(startingStacks.split("\n").last())
@@ -37,6 +36,7 @@ private fun parse(startingStacks: String): Stacks {
 }
 
 private fun compute(inp: String, callback: InstructionCallback): String {
+    val instructionPattern = Regex("""move (\d+) from (\d+) to (\d+)""")
     val (startingStacks, rearrangement) = inp.split("\n\n")
     val stacks = parse(startingStacks)
 
